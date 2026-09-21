@@ -135,11 +135,15 @@ python -m src.cli analyze-incident INC-490786
   RISK: score=70, ROLLBACK recommended=True
   APPROVAL: required — decision=rejected by auto-stub (no human present, defaults to reject)
   WRITEBACK: BLOCKED — report requires human approval and was not approved. Routed to review queue instead of publishing.
+
+Cost so far: $0.000169 over 3 LLM call(s)
 ```
 
 Real Gemini's hypothesis, unlike the mock's fixed-string response:
 
 > "The git commit and CI/CD deploy evidence show that commit `1f9eed4` refactored the payment retry mechanism in `src/payments/retry.py` to use a synchronous call on the `checkout-api` service. Past incident data (`INC-601ec0` and `INC-855529`) links this exact file change (`src/payments/retry.py`) and refactoring pattern directly to deployment regressions, suggesting this synchronous switch plausibly caused the incident..."
+
+**Note on the printed cost figure** (`Cost so far: $0.000169`): computed from `CostMeter`'s per-1K-token pricing constants (`GEMINI_FLASH_LITE_INPUT_PER_1K`/`OUTPUT_PER_1K` in `src/governance/cost_meter.py`), set as a point-in-time estimate for `gemini-3.5-flash-lite`, not fetched live from Google's pricing API. Treat it as a rough token-count-based estimate for comparing runs to each other, not a verified real-time dollar figure — cross-check current rates at ai.google.dev/pricing before treating it as authoritative.
 
 **What's genuinely different from the mock run:**
 - The reasoning is richer and more specific — it explicitly cross-references the RAG-retrieved past incidents (`INC-601ec0`, `INC-855529`) by ID and connects them to the same file path (`src/payments/retry.py`), something the mock's fixed-string responses never do.
@@ -151,8 +155,6 @@ Real Gemini's hypothesis, unlike the mock's fixed-string response:
 - The human-approval gate fired the same way — **a rollback recommendation from real Gemini gets blocked pending human sign-off exactly like a rollback recommendation from the mock does.** The gate is deterministic Python over structured fields (Section C), not a second LLM call, so it doesn't care which model produced the hypothesis it's evaluating.
 
 This is the actual point of the architecture: the governance layer's behavior doesn't depend on which reasoning engine sits underneath it.
-
-**One honest caveat on the printed cost figure:** `Cost so far: $0.000169` is computed from `CostMeter`'s per-1K-token pricing constants (`GEMINI_FLASH_LITE_INPUT_PER_1K`/`OUTPUT_PER_1K` in `src/governance/cost_meter.py`), set as a point-in-time estimate for `gemini-3.5-flash-lite`, not fetched live from Google's pricing API. Treat it as a rough token-count-based estimate for comparing runs to each other, not a verified real-time dollar figure — cross-check current rates at ai.google.dev/pricing before treating it as authoritative.
 
 ## What this demo does *not* cover
 
