@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+token-audit.json
+synthetic_data/generated/
+chroma_db/
+.pytest_cache/
+incident_history.jsonl
+mock_jira_writeback.json
+reports/

@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -e ".[dev,mcp,webhook]"
+      - name: Generate synthetic dataset
+        run: python synthetic_data/generate_incidents.py
+      - name: Run unit + gate tests
+        run: pytest eval/ tests/ -v
+      - name: Run hallucination suite
+        run: python eval/hallucination_suite.py
+      - name: Run confidence calibration suite
+        run: python eval/confidence_calibration.py

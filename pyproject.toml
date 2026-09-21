@@ -1,0 +1,34 @@
+[project]
+name = "incident-rca-copilot"
+version = "0.1.0"
+description = "Governed multi-agent root-cause analysis copilot for production incidents."
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.2",
+    "pydantic>=2.6",
+    "scikit-learn>=1.4",
+    "python-dotenv>=1.0",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+gemini = ["google-generativeai>=0.5"]
+# Swap-in path for production: replace SimpleTfidfStore with a Chroma-backed
+# VectorStore (same interface in src/rag/retriever.py) once embedding-model
+# network access is available.
+chroma = ["chromadb>=0.5"]
+mcp = ["mcp>=1.0"]  # server.py supports both v1 (FastMCP) and v2+ (MCPServer) via a compatibility import
+dashboard = ["streamlit>=1.35"]
+webhook = ["fastapi>=0.110", "uvicorn>=0.30"]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+]
+[tool.pytest.ini_options]
+testpaths = ["eval", "tests"]
+python_files = ["*_suite.py", "test_*.py"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
