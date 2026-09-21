@@ -30,30 +30,45 @@ class LLMClient(ABC):
 
 
 class GeminiClient(LLMClient):
-    """Real Gemini Flash-Lite client. Requires GEMINI_API_KEY and network access."""
+    """
+    Real Gemini client. Requires GEMINI_API_KEY and network access.
 
-    def __init__(self, model: str = "gemini-flash-lite-latest"):
+    Uses the `google-genai` SDK (`pip install google-genai`), NOT the
+    older `google-generativeai` package — Google ended support for
+    google-generativeai (confirmed via a FutureWarning raised at import
+    time in that package as of this writing); this client was updated to
+    the current SDK before ever being exercised against a live key, so
+    the first real call isn't spent testing already-deprecated code.
+    """
+
+    def __init__(self, model: str = "gemini-3.5-flash-lite"):
         api_key = config.get("GEMINI_API_KEY")
         if not api_key:
             raise RuntimeError("GEMINI_API_KEY not set")
         try:
-            import google.generativeai as genai
+            from google import genai
         except ImportError as e:
             raise RuntimeError(
-                "google-generativeai not installed. pip install google-generativeai"
+                "google-genai not installed. pip install google-genai"
             ) from e
-        genai.configure(api_key=api_key)
         self._genai = genai
-        self._model = genai.GenerativeModel(model)
+        self._client = genai.Client(api_key=api_key)
+        self._model = model
 
     def complete(self, system: str, prompt: str) -> LLMResponse:
-        full_prompt = f"{system}\n\n{prompt}"
-        result = self._model.generate_content(full_prompt)
-        text = result.text
-        # Gemini's usage_metadata gives real token counts when available.
-        usage = getattr(result, "usage_metadata", None)
-        input_tokens = getattr(usage, "prompt_token_count", len(full_prompt.split()))
-        output_tokens = getattr(usage, "candidates_token_count", len(text.split()))
+        from google.genai import types
+
+        response = self._client.models.generate_content(
+            model=self._model,
+            contents=prompt,
+            config=types.GenerateContentConfig(system_instruction=system),
+        )
+        text = response.text or ""
+
+        usage = getattr(response, "usage_metadata", None)
+        input_tokens = getattr(usage, "prompt_token_count", None) or len((system + prompt).split())
+        output_tokens = getattr(usage, "candidates_token_count", None) or len(text.split())
+
         return LLMResponse(text=text, input_tokens=input_tokens, output_tokens=output_tokens)
 
 

@@ -9,3 +9,4 @@ chroma_db/
 incident_history.jsonl
 mock_jira_writeback.json
 reports/
+*.egg-info/

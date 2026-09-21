@@ -14,7 +14,13 @@ from dataclasses import dataclass, field
 from datetime import datetime, UTC
 from pathlib import Path
 
-# Rough per-1K-token pricing; update to match the live Gemini pricing page.
+# Pricing for gemini-3.5-flash-lite (the model this project's GeminiClient
+# actually defaults to — see src/llm/client.py). Google's per-model pricing
+# changes over time and isn't fetched live, so this is a point-in-time
+# estimate for cost *tracking* (relative comparison across runs), not a
+# verified real-time billing figure — cross-check against
+# https://ai.google.dev/pricing for current rates before treating the
+# dollar amount this produces as authoritative.
 GEMINI_FLASH_LITE_INPUT_PER_1K = 0.0001
 GEMINI_FLASH_LITE_OUTPUT_PER_1K = 0.0004
 
