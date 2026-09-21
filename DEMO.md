@@ -160,4 +160,4 @@ This is the actual point of the architecture: the governance layer's behavior do
 
 - **Real Jira/GitHub/Grafana/Splunk** — this walkthrough uses the offline mock path (`MockLLMClient`, `MockJiraClient`, synthetic fixtures) so it's reproducible without credentials. `python -m src.ingestion.collector <ISSUE_KEY>` is the real-data equivalent — see the README's "Getting started" for that path, and `ARCHITECTURE.md` Section H for what's been verified against a real Jira instance versus mocked HTTP.
 - **The webhook trigger and dashboard** — both real and tested (see README's verification table), just not included in this terminal walkthrough since they're interactive/long-running rather than single commands with clean output to paste.
-- **Real Gemini** — this used the deterministic offline mock; swap in `GEMINI_API_KEY` to see real LLM reasoning instead.
+
